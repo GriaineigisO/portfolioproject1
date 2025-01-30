@@ -2,3 +2,12 @@
     background-color: blue;
     height: 50px;
 }
+
+#countrySelect {
+    margin-left: 20px;
+    margin-right: 80px;
+}
+
+#map { 
+    height: 700px; 
+}
