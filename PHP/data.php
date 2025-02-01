@@ -18,6 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // Serve JSON data
 header("Content-Type: application/json");
 
-$jsonFilePath = __DIR__ . '/../data.json';
-echo file_get_contents('countryBorders.geo.json');
+$jsonFilePath = __DIR__ . '/../countryBorders.geo.json';
+$countryList = file_get_contents($jsonFilePath);
+
+echo $countryList;
 
