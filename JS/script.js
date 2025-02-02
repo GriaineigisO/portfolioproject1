@@ -2,12 +2,7 @@
 let countryData = null;
 
 // Reference to the Leaflet map (initialize it once globally)
-let map = L.map("map").setView([20, 0], 17); // Default view
-
-L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 19,
-  attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-}).addTo(map);
+let map;
 
 // Fetch country data and store it globally
 async function fetchCountries() {
@@ -20,6 +15,44 @@ async function fetchCountries() {
   }
 }
 
+// Function to initialize the map and set the view to the user's location
+function initializeMap() {
+  // Default view (fallback if geolocation fails)
+  const defaultView = [20, 0];
+  const defaultZoom = 2;
+
+  // Initialize the map
+  map = L.map("map").setView(defaultView, defaultZoom);
+
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  }).addTo(map);
+
+  // Try to get the user's current location
+  if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const userLat = position.coords.latitude;
+        const userLng = position.coords.longitude;
+        console.log("Found your location \nLat : " + userLat + " \nLng : " + userLng);
+
+        // Set the map view to the user's location
+        map.setView([userLat, userLng], 13); // Zoom level 13 for a closer view
+      },
+      (error) => {
+        console.error("Error getting user location:", error);
+        // Fallback to default view if geolocation fails
+        map.setView(defaultView, defaultZoom);
+      }
+    );
+  } else {
+    console.log("Browser doesn't support geolocation!");
+    // Fallback to default view if geolocation is not supported
+    map.setView(defaultView, defaultZoom);
+  }
+}
+
 // Function to update the map when a country is selected
 function useSelectedCountry() {
   if (!countryData) {
@@ -28,19 +61,19 @@ function useSelectedCountry() {
   }
 
   let selectedCountry = document.getElementById("countrySelect").value;
-  console.log("Selected country:", selectedCountry);
 
   for (let i = 0; i < countryData.features.length; i++) {
     if (countryData.features[i].properties.name === selectedCountry) {
-      let coordinates = countryData.features[i].geometry.coordinates;
+      const geometry = countryData.features[i].geometry;
 
-      // Handle MultiPolygons or Polygons
-      let firstPolygon = coordinates[0][0]; // Get first polygon's first coordinate
-      let lon = firstPolygon[0]; // GeoJSON stores [longitude, latitude]
-      let lat = firstPolygon[1]; // Swap for Leaflet
-
-      console.log("Moving to:", lat, lon);
-      map.setView([lat, lon], 7); // Update map view
+      // Handle Polygon or MultiPolygon
+      if (geometry.type === "Polygon" || geometry.type === "MultiPolygon") {
+        const feature = turf.feature(geometry); // Create a Turf feature
+        const bbox = turf.bbox(feature); // Get bounding box
+        map.fitBounds([[bbox[1], bbox[0]], [bbox[3], bbox[2]]]); // Fit map to bounds
+      } else {
+        console.error("Unsupported geometry type:", geometry.type);
+      }
       return;
     }
   }
@@ -48,8 +81,9 @@ function useSelectedCountry() {
   console.warn("Country not found in dataset!");
 }
 
-// Wait for the DOM to load, then attach event listeners
+// Wait for the DOM to load, then initialize the map and fetch country data
 document.addEventListener("DOMContentLoaded", async function () {
+  initializeMap(); // Initialize the map with user's location or default view
   await fetchCountries(); // Load country data
   document.getElementById("countrySelect").addEventListener("change", useSelectedCountry);
 });
