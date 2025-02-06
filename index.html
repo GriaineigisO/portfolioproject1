@@ -11,46 +11,97 @@
       crossorigin="anonymous"
     />
     <title>Portfolio Project 1</title>
-    <link rel="stylesheet" href="http://localhost/maarcisOdonon/portfolioproject1/CSS/style.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-     crossorigin=""/>
-
+    <link
+      rel="stylesheet"
+      href="http://localhost/maarcisOdonon/portfolioproject1/CSS/style.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
   </head>
 
   <body>
     <div class="row navbar">
-      <select id="countrySelect">
-        
-      </select>
+      <select id="countrySelect"></select>
     </div>
 
     <div class="row">
+      <div id="country-info-container">
+        <div id="country-info">
+          <div id="name-flag-div">
+          <h4><a id="country-name" target="_blank"></a></h4>
+          <img id="flag">
+          </div>
 
-      <div id="map"></div>
+          <table>
+            <tr>
+              <td class="table-label">Continent:</td>
+              <td class="table-content" id="continent"></td>
+            </tr>
+            <tr>
+              <td class="table-label">Country Code:</td>
+              <td  class="table-content" id="country-code"></td>
+            </tr>
+            <tr>
+              <td class="table-label">Population:</td>
+              <td  class="table-content" id="population"></td>
+            </tr>
+            <tr>
+              <td class="table-label">Capital:</td>
+              <td  class="table-content" id="capital"></td>
+            </tr>
+            <tr>
+              <td class="table-label">Currency:</td>
+              <td  class="table-content" id="currency"></td>
+            </tr>
+            <tr>
+              <td class="table-label">Area:</td>
+              <td class="table-content"><span id="area""></span>km<sup>2</sup></td>
+            </tr>
+          </table>
+        </div>
 
+        <div id="map"></div>
+      </div>
     </div>
 
     <script>
       // Fetch options from countryList.php
-      fetch("http://localhost/maarcisOdonon/portfolioproject1/PHP/countryList.php")
+      fetch(
+        "http://localhost/maarcisOdonon/portfolioproject1/PHP/countryList.php"
+      )
         .then((response) => response.text())
         .then((options) => {
           document.getElementById("countrySelect").innerHTML = options;
         })
         .catch((error) => console.error("Error loading countries:", error));
     </script>
-    
+
+    <script
+      type="application/javascript"
+      src="jquery/jquery-2.2.3.min.js"
+    ></script>
+
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-     crossorigin=""></script>
-    <script type="module" src="http://localhost/maarcisOdonon/portfolioproject1/JS/script.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+
+    <script
+      type="module"
+      src="http://localhost/maarcisOdonon/portfolioproject1/JS/script.js"
+    ></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
   </body>
 </html>
