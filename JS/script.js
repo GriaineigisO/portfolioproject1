@@ -8,12 +8,33 @@ let map;
 async function fetchCountries() {
   try {
     const response = await fetch(
-      "http://localhost/maarcisOdonon/portfolioproject1/PHP/data.php"
+      "./PHP/data.php"
     );
     countryData = await response.json(); // Store the data globally
     console.log("Country data loaded:", countryData);
   } catch (error) {
     console.error("Error loading countries:", error);
+  }
+}
+
+async function reverseGeocode(lat, lng) {
+  const apiKey = "a4ccea8ecd8147fdb63d38ea593e3ff5"; // Replace with your OpenCage API key
+  const url = `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lng}&key=${apiKey}`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    if (data.results && data.results.length > 0) {
+      const country = data.results[0].components.country;
+      console.log("Detected country:", country);
+      return country;
+    } else {
+      console.error("No results found for reverse geocoding.");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error during reverse geocoding:", error);
+    return null;
   }
 }
 
@@ -35,12 +56,21 @@ function initializeMap() {
   // Try to get the user's current location
   if ("geolocation" in navigator) {
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const userLat = position.coords.latitude;
         const userLng = position.coords.longitude;
 
         // Set the map view to the user's location
         map.setView([userLat, userLng], 13); // Zoom level 13 for a closer view
+
+        // Detect the user's country
+        const country = await reverseGeocode(userLat, userLng);
+        if (country) {
+          // Update the dropdown list to reflect the user's country
+          const countrySelect = document.getElementById("countrySelect");
+          countrySelect.value = country;
+          useSelectedCountry(); // Update the map and UI
+        }
       },
       (error) => {
         console.error("Error getting user location:", error);
