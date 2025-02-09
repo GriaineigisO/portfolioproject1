@@ -26,7 +26,6 @@ async function reverseGeocode(lat, lng) {
     const data = await response.json();
     if (data.results && data.results.length > 0) {
       const country = data.results[0].components.country;
-      console.log("Detected country:", country);
       return country;
     } else {
       console.error("No results found for reverse geocoding.");
@@ -123,6 +122,7 @@ function useSelectedCountry() {
   console.warn("Country not found in dataset!");
 }
 
+
 // Wait for the DOM to load, then initialize the map and fetch country data
 document.addEventListener("DOMContentLoaded", async function () {
   initializeMap(); // Initialize the map with user's location or default view
@@ -158,6 +158,8 @@ function countryInfo(countryCode, countryName) {
           "href",
           `https://en.wikipedia.org/wiki/${countryName}`
         );
+
+        getWeather(entry.capital, countryName);
       } else {
         console.error("API status is not OK:", result.status);
       }
@@ -175,8 +177,28 @@ function countryInfo(countryCode, countryName) {
     dataType: "json",
     success: function (result) {
       const entry = result;
-      console.log(result);
       $("#denonym").html(entry.demonym);
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+      console.error("AJAX Error:", textStatus, errorThrown, jqXHR.responseText);
+      console.log(jqXHR.responseText);
+    },
+  });
+}
+
+//Function to recieve weather data
+function getWeather(capital, country) {
+  $.ajax({
+    url: `https://api.openweathermap.org/data/2.5/weather?q=${capital.toLowerCase()},${country.toLowerCase()}&APPID=f33a3fb8c17b7ef1026439ad7f3a27a2`,
+    type: "GET",
+    dataType: "json",
+
+    success: function (result) {
+        $("#weather-description").html(result.weather[0].description);
+        $("#temperature").html((result.main.temp - 273.15).toFixed(1));
+        $("#humidity").html(result.main.humidity);
+        $("#wind-speed").html(result.wind.speed);
+
     },
     error: function (jqXHR, textStatus, errorThrown) {
       console.error("AJAX Error:", textStatus, errorThrown, jqXHR.responseText);
