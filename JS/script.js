@@ -7,9 +7,7 @@ let map;
 // Fetch country data and store it globally
 async function fetchCountries() {
   try {
-    const response = await fetch(
-      "./PHP/data.php"
-    );
+    const response = await fetch("./PHP/data.php");
     countryData = await response.json(); // Store the data globally
     console.log("Country data loaded:", countryData);
   } catch (error) {
@@ -122,10 +120,9 @@ function useSelectedCountry() {
   console.warn("Country not found in dataset!");
 }
 
-
 // Wait for the DOM to load, then initialize the map and fetch country data
 document.addEventListener("DOMContentLoaded", async function () {
-  initializeMap(); // Initialize the map with user's location or default view
+  //initializeMap(); // Initialize the map with user's location or default view
   await fetchCountries(); // Load country data
   document
     .getElementById("countrySelect")
@@ -194,11 +191,10 @@ function getWeather(capital, country) {
     dataType: "json",
 
     success: function (result) {
-        $("#weather-description").html(result.weather[0].description);
-        $("#temperature").html((result.main.temp - 273.15).toFixed(1));
-        $("#humidity").html(result.main.humidity);
-        $("#wind-speed").html(result.wind.speed);
-
+      $("#weather-description").html(result.weather[0].description);
+      $("#temperature").html((result.main.temp - 273.15).toFixed(1));
+      $("#humidity").html(result.main.humidity);
+      $("#wind-speed").html(result.wind.speed);
     },
     error: function (jqXHR, textStatus, errorThrown) {
       console.error("AJAX Error:", textStatus, errorThrown, jqXHR.responseText);
@@ -206,3 +202,51 @@ function getWeather(capital, country) {
     },
   });
 }
+
+var streets = L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+  {
+    attribution:
+      "Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012",
+  }
+);
+
+var satellite = L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  {
+    attribution:
+      "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+  }
+);
+
+var basemaps = {
+  Streets: streets,
+  Satellite: satellite,
+};
+
+// buttons
+
+var infoBtn = L.easyButton("fa-info fa-xl", function (btn, map) {
+  $("#exampleModal").modal("show");
+});
+
+var currencyBtn = L.easyButton("fa-coins fa-xl", function (btn, map) {
+  $("#currencyConverterModal").modal("show");
+});
+
+// ---------------------------------------------------------
+// EVENT HANDLERS
+// ---------------------------------------------------------
+
+// initialise and add controls once DOM is ready
+
+$(document).ready(function () {
+  initializeMap();
+  // setView is not required in your application as you will be
+  // deploying map.fitBounds() on the country border polygon
+
+  let layerControl = L.control.layers(basemaps).addTo(map);
+
+  infoBtn.addTo(map);
+  currencyBtn.addTo(map);
+});

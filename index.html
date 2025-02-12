@@ -4,87 +4,144 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-      crossorigin="anonymous"
-    />
-    <title>Portfolio Project 1</title>
-    <link
+
+    <link rel="stylesheet" href="http://localhost/maarcisOdonon/portfolioproject1/CSS/leaflet.css" />
+
+    <link rel="stylesheet" href="http://localhost/maarcisOdonon/portfolioproject1/CSS/toastify.min.css" />
+
+    <link rel="stylesheet" href="http://localhost/maarcisOdonon/portfolioproject1/CSS/MarkerCluster.Default.min.css" />
+
+    <link rel="stylesheet" href="http://localhost/maarcisOdonon/portfolioproject1/CSS/MarkerCluster.min.css" />
+
+    <link rel="stylesheet" href="http://localhost/maarcisOdonon/portfolioproject1/CSS/leaflet.extra-markers.min.css" />
+
+    <link rel="stylesheet" href="http://localhost/maarcisOdonon/portfolioproject1/CSS/all.min.css" />
+
+    <link rel="stylesheet" href="http://localhost/maarcisOdonon/portfolioproject1/CSS/bootstrap.min.css" />
+
+    <link rel="stylesheet" href="http://localhost/maarcisOdonon/portfolioproject1/CSS/easy-button.min.css" /> 
+
+     <link
       rel="stylesheet"
       href="http://localhost/maarcisOdonon/portfolioproject1/CSS/style.css"
     />
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-      crossorigin=""
-    />
+
+    <title>Portfolio Project 1</title>
   </head>
 
   <body>
-    <div class="row navbar">
-      <select id="countrySelect"></select>
+    <span id="selectContainer">
+      <select id="countrySelect" class="form-select shadow-sm">
+        <!-- populate from an AJAX CALL to a PHP routine that returns a JSON object that is an array of just ISO codes and names from countryBorders.geo.json -->
+        
+      </select>
+    </span>
+
+    <div id="map"></div>
+
+    <!-- example modal layout -->
+
+    <div id="exampleModal" class="modal" data-bs-backdrop="false" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content shadow">
+          <div class="modal-header bg-success bg-gradient text-white">
+            <h5 class="modal-title" id="country-name"></h5>
+            <img id="flag">
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <table class="table table-striped">
+              <tr>
+                <td class="text-center">
+                  <i class="fa-solid fa-city fa-xl text-success"></i>
+                </td>
+
+                <td>Capital</td>
+
+                <td class="text-end" id="capital"></td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i class="fa-solid fa-user-group fa-xl text-success"></i>
+                </td>
+
+                <td>Population</td>
+
+                <td class="text-end" id="population"></td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i class="fa-solid fa-book-atlas fa-xl text-success"></i>
+                </td>
+
+                <td>Continent</td>
+
+                <td class="text-end" id="continent"></td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i class="fa-solid fa-ruler fa-xl text-success"></i>
+                </td>
+
+                <td>Area</td>
+
+                <td class="text-end"><span id="area"></span>km<sup>2</sup></td>
+              </tr>
+
+            </table>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-outline-success btn-sm"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="row">
-      <div id="country-info-container">
-        <div id="country-info">
-          <div id="name-flag-div">
-          <h4><a id="country-name" target="_blank"></a></h4>
-          <img id="flag">
+    <div id="currencyConverterModal" class="modal" data-bs-backdrop="false" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content shadow">
+          <div class="modal-header bg-success bg-gradient text-white">
+            <h5 class="modal-title">Currency Converter</h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
           </div>
+          <div class="modal-body">
+            <table class="table table-striped">
+              <tr>
+                <td><input class="currency-input"></input></td>
+                <td><select id="currency-converter start-currency"></select></td>
+                <td><span class="fa-solid fa-chevron-right"></span></td>
+                <td><input class="currency-input"></input></td>
+                <td><select id="currency-converter start-currency"></select></td>
+              </tr>
 
-          <table>
-            <tr>
-              <td class="table-label">Continent:</td>
-              <td class="table-content" id="continent"></td>
-            </tr>
-            <tr>
-              <td class="table-label">Country Code:</td>
-              <td  class="table-content" id="country-code"></td>
-            </tr>
-            <tr>
-              <td class="table-label">Population:</td>
-              <td  class="table-content" id="population"></td>
-            </tr>
-            <tr>
-              <td class="table-label">Capital:</td>
-              <td  class="table-content" id="capital"></td>
-            </tr>
-            <tr>
-              <td class="table-label">Currency:</td>
-              <td  class="table-content" id="currency"></td>
-            </tr>
-            <tr>
-              <td class="table-label">Area:</td>
-              <td class="table-content"><span id="area""></span>km<sup>2</sup></td>
-            </tr>
-            <tr>
-              <td colspan="2" style="text-align:center; font-size: 20px">Capital Weather</td>
-            </tr>
-            <tr>
-              <td class="table-label">Description:</td>
-              <td class="table-content"><span id="weather-description"></span></td>
-            </tr>
-            <tr>
-              <td class="table-label">Temperature:</td>
-              <td class="table-content"><span id="temperature"></span>°C</td>
-            </tr>
-            <tr>
-              <td class="table-label">Humidity:</td>
-              <td class="table-content"><span id="humidity"></span>%</td>
-            </tr>
-            <tr>
-              <td class="table-label">Wind Speed:</td>
-              <td class="table-content"><span id="wind-speed"></span>mph</td>
-            </tr>
-          </table>
-
+            </table>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-outline-success btn-sm"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
         </div>
-
-        <div id="map"></div>
       </div>
     </div>
 
@@ -102,19 +159,31 @@
 
     <script
       type="application/javascript"
-      src="jquery/jquery-2.2.3.min.js"
+      src="http://localhost/maarcisOdonon/portfolioproject1/JS/leaflet.js"
     ></script>
 
     <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-      crossorigin="anonymous"
+      src="http://localhost/maarcisOdonon/portfolioproject1/jquery/jquery.min.js"
     ></script>
 
     <script
-      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-      crossorigin=""
+      src="http://localhost/maarcisOdonon/portfolioproject1/JS/toastify.min.js"
+    ></script>
+
+    <script
+      src="http://localhost/maarcisOdonon/portfolioproject1/JS/leaflet.markercluster.js"
+    ></script>
+
+    <script
+      src="http://localhost/maarcisOdonon/portfolioproject1/JS/leaflet.extra-markers.js"
+    ></script>
+
+    <script
+      src="http://localhost/maarcisOdonon/portfolioproject1/JS/bootstrap.min.js"
+    ></script>
+
+    <script
+      src="http://localhost/maarcisOdonon/portfolioproject1/JS/easy-button.min.js"
     ></script>
 
     <script
