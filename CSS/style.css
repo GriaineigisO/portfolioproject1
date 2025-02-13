@@ -30,3 +30,8 @@ html, body {
 .currency-input {
   width: 100px;
 }
+
+#convert {
+  border-radius: 10px;
+  margin-left: 200px;
+}

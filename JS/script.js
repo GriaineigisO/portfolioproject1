@@ -170,6 +170,7 @@ function countryInfo(countryCode, countryName) {
   });
 }
 
+let currencyCodes = "";
 function currencyInfo() {
   $.ajax({
     url: "./PHP/currencyExchange.php",
@@ -180,15 +181,14 @@ function currencyInfo() {
         result = JSON.parse(result);
 
         //pushes all currency code keys to currencyCodeArray
-        let currencyCodes = result.rates;
-        let currencyCodeArray = Object.keys(currencyCodes); 
+        currencyCodes = result.rates;
+        let currencyCodeArray = Object.keys(currencyCodes);
 
         let selectElements = document.querySelectorAll(".currency-converter");
 
-        selectElements.forEach(select => {
-        
+        selectElements.forEach((select) => {
           // Create and append <option> elements
-          currencyCodeArray.forEach(code => {
+          currencyCodeArray.forEach((code) => {
             let option = document.createElement("option");
             option.value = code;
             option.textContent = code;
@@ -196,6 +196,7 @@ function currencyInfo() {
           });
         });
 
+        return currencyCodes;
       } else {
         console.error("API status is not OK:", result.status);
       }
@@ -205,6 +206,22 @@ function currencyInfo() {
       console.log(jqXHR.responseText);
     },
   });
+}
+
+document.getElementById("convert").addEventListener("click", convertCurrency);
+function convertCurrency() {
+  let rateA = document.getElementById("start-currency").value;
+  let rateB = document.getElementById("end-currency").value;
+  let amountA = document.getElementById("start-amount").value;
+
+  let usdAmount = amountA / currencyCodes[rateA];
+
+  if (rateB !== "USD") {
+    let finalAmount = usdAmount * currencyCodes[rateB];
+    document.getElementById("end-amount").value = finalAmount;
+  } else {
+    document.getElementById("end-amount").value = usdAmount;
+  }
 }
 
 //Function to recieve weather data

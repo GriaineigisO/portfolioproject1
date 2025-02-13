@@ -123,14 +123,14 @@
           <div class="modal-body">
             <table class="table table-striped">
               <tr>
-                <td><input class="currency-input"></input></td>
+                <td><input class="currency-input" id="start-amount" type="number"></input></td>
                 <td><select class="currency-converter" id="start-currency"></select></td>
                 <td><span class="fa-solid fa-chevron-right"></span></td>
-                <td><input class="currency-input"></input></td>
-                <td><select class="currency-converter" id="start-currency"></select></td>
+                <td><input class="currency-input" id="end-amount"></input></td>
+                <td><select class="currency-converter" id="end-currency"></select></td>
               </tr>
-
             </table>
+            <td><button id="convert">Convert</button></td>
           </div>
           <div class="modal-footer">
             <button
