@@ -102,6 +102,8 @@ function useSelectedCountry() {
         countryData.features[i].properties.name
       );
 
+      currencyInfo();
+
       // Handle Polygon or MultiPolygon
       if (geometry.type === "Polygon" || geometry.type === "MultiPolygon") {
         const feature = turf.feature(geometry); // Create a Turf feature
@@ -166,15 +168,37 @@ function countryInfo(countryCode, countryName) {
       console.log(jqXHR.responseText);
     },
   });
+}
 
+function currencyInfo() {
   $.ajax({
-    url: `https://api.countrylayer.com/v2/name/${countryName}?access_key=
-03b4bb78064bdd17697fcff47e22c695&fullText=true`,
+    url: "./PHP/currencyExchange.php",
     type: "GET",
     dataType: "json",
     success: function (result) {
-      const entry = result;
-      $("#denonym").html(entry.demonym);
+      if (result) {
+        result = JSON.parse(result);
+
+        //pushes all currency code keys to currencyCodeArray
+        let currencyCodes = result.rates;
+        let currencyCodeArray = Object.keys(currencyCodes); 
+
+        let selectElements = document.querySelectorAll(".currency-converter");
+
+        selectElements.forEach(select => {
+        
+          // Create and append <option> elements
+          currencyCodeArray.forEach(code => {
+            let option = document.createElement("option");
+            option.value = code;
+            option.textContent = code;
+            select.appendChild(option);
+          });
+        });
+
+      } else {
+        console.error("API status is not OK:", result.status);
+      }
     },
     error: function (jqXHR, textStatus, errorThrown) {
       console.error("AJAX Error:", textStatus, errorThrown, jqXHR.responseText);
