@@ -159,28 +159,38 @@
           </div>
           <div class="modal-body weather-modal-body">
 
-            <div class="weather-div">
-              <h5>Summary</h5>
-              <span id="summary"></span>
-              <span id="weather-description"></span>
-              <img id="weather-icon">
-            </div>
-
-            <div class="weather-div">
-              <h5>Temperature</h5>
-              <span id="temp-reading"><span id="temperature"></span>°C</span><i class="fa-solid fa-temperature-low fa-xl text-success"></i>
-
-              <div id="feels-like-div">
-                <p>Feels like: <span id="feels-like"></span>°C</p>
+            <div class="col">
+              <div class="row">
+                <div id="weather-div-top">
+                  <img id="weather-icon">
+                  <p id="temp-reading"><span id="temperature"></span>°C</p>
+                  <span id="weather-description"></span>
+                </div>
               </div>
 
+              <div class="row" id="bottom-weather-row">
+                <div class="col">
+                  <div class="icon-data-div">
+                    <i class="fa-solid fa-temperature-low" class="bigger-icon"></i>
+                    <div class="weather-div-bottom">
+                      <p>Feels like</p>
+                      <p><span id="feels-like"></span>°C</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col">
+                  <div  class="icon-data-div">
+                    <i class="fa-solid fa-droplet"></i>
+                    <div class="weather-div-bottom">
+                      <p>Humidity</p>
+                      <p><span id="humidity"></span>%</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+          
 
-            <div  class="weather-div">
-              <p>Humidity: <span id="humidity"></span>%</p>
-            </div>
-
-       
           </div>
           <div class="modal-footer">
             <button
