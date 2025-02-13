@@ -60,6 +60,7 @@ function initializeMap() {
         // Set the map view to the user's location
         map.setView([userLat, userLng], 13); // Zoom level 13 for a closer view
 
+
         // Detect the user's country
         const country = await reverseGeocode(userLat, userLng);
         if (country) {
@@ -103,6 +104,7 @@ function useSelectedCountry() {
       );
 
       currencyInfo();
+      getAirports(countryData.features[i].properties.iso_a2);
 
       // Handle Polygon or MultiPolygon
       if (geometry.type === "Polygon" || geometry.type === "MultiPolygon") {
@@ -115,6 +117,7 @@ function useSelectedCountry() {
       } else {
         console.error("Unsupported geometry type:", geometry.type);
       }
+
       return;
     }
   }
@@ -166,6 +169,34 @@ function countryInfo(countryCode, countryName) {
     error: function (jqXHR, textStatus, errorThrown) {
       console.error("AJAX Error:", textStatus, errorThrown, jqXHR.responseText);
       console.log(jqXHR.responseText);
+    },
+  });
+}
+
+function getAirports(country) {
+  $.ajax({
+    method: "GET",
+    url: "https://api.api-ninjas.com/v1/airports?country=" + country,
+    headers: { "X-Api-Key": "OW44mw6RiogxF7XMVbmQAA==2hLu3UVY95smbCsI" },
+    contentType: "application/json",
+    success: function (result) {
+
+      for (let i = 0; i < result.length; i++) {
+        let lat = result[i].latitude;
+        let lng = result[i].longitude;
+
+        var redMarker = L.ExtraMarkers.icon({
+          icon: "fa-plane",
+          markerColor: "red",
+          shape: "square",
+          prefix: "fa",
+        });
+
+        L.marker([lat, lng], { icon: redMarker }).addTo(map);
+      }
+    },
+    error: function ajaxError(jqXHR) {
+      console.error("Error: ", jqXHR.responseText);
     },
   });
 }
@@ -233,7 +264,9 @@ function getWeather(capital, country) {
 
     success: function (result) {
       $("#weather-description").html(result.weather[0].description);
+      $("#weather-icon").attr("src", `https://openweathermap.org/img/wn/${result.weather[0].icon}.png`);
       $("#temperature").html((result.main.temp - 273.15).toFixed(1));
+      $("#feels-like").html((result.main.feels_like - 273.15).toFixed(1));
       $("#humidity").html(result.main.humidity);
       $("#wind-speed").html(result.wind.speed);
     },
@@ -275,6 +308,10 @@ var currencyBtn = L.easyButton("fa-coins fa-xl", function (btn, map) {
   $("#currencyConverterModal").modal("show");
 });
 
+var weatherBtn = L.easyButton("fa-cloud fa-xl", function (btn, map) {
+  $("#weatherModal").modal("show");
+});
+
 // ---------------------------------------------------------
 // EVENT HANDLERS
 // ---------------------------------------------------------
@@ -290,4 +327,5 @@ $(document).ready(function () {
 
   infoBtn.addTo(map);
   currencyBtn.addTo(map);
+  weatherBtn.addTo(map);
 });

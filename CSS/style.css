@@ -35,3 +35,24 @@ html, body {
   border-radius: 10px;
   margin-left: 200px;
 }
+
+.weather-div {
+  border-radius: 10px;
+  border: solid 1px rgba(255, 255, 255, 0.3);
+  margin: 10px;
+  padding: 5px;
+}
+
+.weather-modal-body {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+#temperature {
+  font-size: 18px;
+}
+
+#temp-reading {
+  margin-right: 10px;
+}
