@@ -9,7 +9,6 @@ async function fetchCountries() {
   try {
     const response = await fetch("./PHP/data.php");
     countryData = await response.json(); // Store the data globally
-    console.log("Country data loaded:", countryData);
   } catch (error) {
     console.error("Error loading countries:", error);
   }
@@ -114,6 +113,7 @@ function useSelectedCountry() {
           [bbox[1], bbox[0]],
           [bbox[3], bbox[2]],
         ]); // Fit map to bounds
+        getEarthquakes(bbox[3], bbox[2], bbox[1], bbox[0])
       } else {
         console.error("Unsupported geometry type:", geometry.type);
       }
@@ -173,33 +173,81 @@ function countryInfo(countryCode, countryName) {
   });
 }
 
+let airportLayer = L.layerGroup(); // Global layer to store airport markers
+
 function getAirports(country) {
+  // Clear previous airport markers to avoid duplicates
+  airportLayer.clearLayers();
+
   $.ajax({
     method: "GET",
     url: "https://api.api-ninjas.com/v1/airports?country=" + country,
     headers: { "X-Api-Key": "OW44mw6RiogxF7XMVbmQAA==2hLu3UVY95smbCsI" },
     contentType: "application/json",
     success: function (result) {
-
       for (let i = 0; i < result.length; i++) {
         let lat = result[i].latitude;
         let lng = result[i].longitude;
 
-        var redMarker = L.ExtraMarkers.icon({
+        let redMarker = L.ExtraMarkers.icon({
           icon: "fa-plane",
           markerColor: "red",
           shape: "square",
           prefix: "fa",
         });
 
-        L.marker([lat, lng], { icon: redMarker }).addTo(map);
+        let marker = L.marker([lat, lng], { icon: redMarker });
+        airportLayer.addLayer(marker);
+        
       }
+
+      console.log(`${result.length} airports loaded.`);
     },
     error: function ajaxError(jqXHR) {
       console.error("Error: ", jqXHR.responseText);
     },
   });
 }
+
+let earthquakeLayer = L.layerGroup(); // Global layer to store airport markers
+function getEarthquakes(north, east, south, west) {
+  // Clear previous markers to avoid duplicates
+  earthquakeLayer.clearLayers();
+
+  $.ajax({
+    method: "GET",
+    url: `./PHP/earthquake.php`,
+    dataType: "json",
+    data: {
+      north: north,
+      south: south,
+      west: west,
+      east: east
+    },
+    success: function (result) {
+      for (let i = 0; i < result.data.earthquakes.length; i++) {
+        let lat = result.data.earthquakes[i].lat;
+        let lng = result.data.earthquakes[i].lng;
+        let redMarker = L.ExtraMarkers.icon({
+          icon: "fa-house-crack",
+          markerColor: "red",
+          shape: "square",
+          prefix: "fa",
+        });
+
+        let marker = L.marker([lat, lng], { icon: redMarker });
+        earthquakeLayer.addLayer(marker);
+        
+      }
+
+      console.log(`${result.data.earthquakes.length} earthquakes loaded.`);
+    },
+    error: function ajaxError(jqXHR) {
+      console.error("Error: ", jqXHR.responseText);
+    },
+  });
+}
+
 
 let currencyCodes = "";
 function currencyInfo() {
@@ -293,10 +341,19 @@ var satellite = L.tileLayer(
   }
 );
 
-var basemaps = {
-  Streets: streets,
-  Satellite: satellite,
-};
+
+
+  var basemaps = {
+    Streets: streets,
+    Satellite: satellite
+  };
+  
+  var markermaps = {
+    Airports: airportLayer,
+    Earthquakes: earthquakeLayer
+  }
+
+  
 
 // buttons
 
@@ -323,7 +380,9 @@ $(document).ready(function () {
   // setView is not required in your application as you will be
   // deploying map.fitBounds() on the country border polygon
 
-  let layerControl = L.control.layers(basemaps).addTo(map);
+  L.control.layers(basemaps).addTo(map);
+  L.control.layers(markermaps).addTo(map);
+
 
   infoBtn.addTo(map);
   currencyBtn.addTo(map);
