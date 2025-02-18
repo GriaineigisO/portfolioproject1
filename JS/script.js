@@ -14,24 +14,20 @@ async function fetchCountries() {
   }
 }
 
-async function reverseGeocode(lat, lng) {
-  const apiKey = "a4ccea8ecd8147fdb63d38ea593e3ff5"; // Replace with your OpenCage API key
-  const url = `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lng}&key=${apiKey}`;
-
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-    if (data.results && data.results.length > 0) {
-      const country = data.results[0].components.country;
-      return country;
-    } else {
-      console.error("No results found for reverse geocoding.");
-      return null;
-    }
-  } catch (error) {
-    console.error("Error during reverse geocoding:", error);
-    return null;
-  }
+function reverseGeocode(lat, lng) {
+  return new Promise((resolve, reject) => {
+    $.ajax({
+      url: "./PHP/reverseGeocode.php",
+      type: "GET",
+      dataType: "json",
+      data: { lat, lng },
+      success: function (result) {
+        const country = result.data.results[0].components.country;
+        resolve(country);
+      },
+      error: reject,
+    });
+  });
 }
 
 // Function to initialize the map and set the view to the user's location
@@ -58,7 +54,6 @@ function initializeMap() {
 
         // Set the map view to the user's location
         map.setView([userLat, userLng], 13); // Zoom level 13 for a closer view
-
 
         // Detect the user's country
         const country = await reverseGeocode(userLat, userLng);
@@ -113,7 +108,7 @@ function useSelectedCountry() {
           [bbox[1], bbox[0]],
           [bbox[3], bbox[2]],
         ]); // Fit map to bounds
-        getEarthquakes(bbox[3], bbox[2], bbox[1], bbox[0])
+        getEarthquakes(bbox[3], bbox[2], bbox[1], bbox[0]);
       } else {
         console.error("Unsupported geometry type:", geometry.type);
       }
@@ -173,7 +168,7 @@ function countryInfo(countryCode, countryName) {
   });
 }
 
-let airportLayer = L.layerGroup(); // Global layer to store airport markers
+let airportLayer = L.markerClusterGroup(); // Global layer to store airport markers
 
 function getAirports(country) {
   // Clear previous airport markers to avoid duplicates
@@ -181,13 +176,15 @@ function getAirports(country) {
 
   $.ajax({
     method: "GET",
-    url: "https://api.api-ninjas.com/v1/airports?country=" + country,
-    headers: { "X-Api-Key": "OW44mw6RiogxF7XMVbmQAA==2hLu3UVY95smbCsI" },
+    url: "./PHP/airports.php",
     contentType: "application/json",
+    data: {
+      country: country,
+    },
     success: function (result) {
-      for (let i = 0; i < result.length; i++) {
-        let lat = result[i].latitude;
-        let lng = result[i].longitude;
+      for (let i = 0; i < result.data.length; i++) {
+        let lat = result.data[i].latitude;
+        let lng = result.data[i].longitude;
 
         let redMarker = L.ExtraMarkers.icon({
           icon: "fa-plane",
@@ -197,11 +194,20 @@ function getAirports(country) {
         });
 
         let marker = L.marker([lat, lng], { icon: redMarker });
+
+        let popupContent = `
+          <strong>Name:</strong> ${result.data[i].name}<br>
+          <strong>City:</strong> ${result.data[i].city}<br>
+          <strong>Country:</strong> ${result.data[i].country}
+        `;
+
+        // Bind popup to marker and add click event
+        marker.bindPopup(popupContent);
+
         airportLayer.addLayer(marker);
-        
       }
 
-      console.log(`${result.length} airports loaded.`);
+      console.log(`${result.data.length} airports loaded.`);
     },
     error: function ajaxError(jqXHR) {
       console.error("Error: ", jqXHR.responseText);
@@ -209,7 +215,7 @@ function getAirports(country) {
   });
 }
 
-let earthquakeLayer = L.layerGroup(); // Global layer to store airport markers
+let earthquakeLayer = L.markerClusterGroup(); // Global layer to store airport markers
 function getEarthquakes(north, east, south, west) {
   // Clear previous markers to avoid duplicates
   earthquakeLayer.clearLayers();
@@ -222,7 +228,7 @@ function getEarthquakes(north, east, south, west) {
       north: north,
       south: south,
       west: west,
-      east: east
+      east: east,
     },
     success: function (result) {
       for (let i = 0; i < result.data.earthquakes.length; i++) {
@@ -236,8 +242,17 @@ function getEarthquakes(north, east, south, west) {
         });
 
         let marker = L.marker([lat, lng], { icon: redMarker });
+
+        let popupContent = `
+          <strong>Date:</strong> ${result.data.earthquakes[i].datetime}<br>
+          <strong>Magnitude:</strong> ${result.data.earthquakes[i].magnitude}<br>
+          <strong>Depth:</strong> ${result.data.earthquakes[i].depth} km
+        `;
+
+        // Bind popup to marker and add click event
+        marker.bindPopup(popupContent);
+
         earthquakeLayer.addLayer(marker);
-        
       }
 
       console.log(`${result.data.earthquakes.length} earthquakes loaded.`);
@@ -247,7 +262,6 @@ function getEarthquakes(north, east, south, west) {
     },
   });
 }
-
 
 let currencyCodes = "";
 function currencyInfo() {
@@ -312,7 +326,10 @@ function getWeather(capital, country) {
 
     success: function (result) {
       $("#weather-description").html(result.weather[0].description);
-      $("#weather-icon").attr("src", `https://openweathermap.org/img/wn/${result.weather[0].icon}.png`);
+      $("#weather-icon").attr(
+        "src",
+        `https://openweathermap.org/img/wn/${result.weather[0].icon}.png`
+      );
       $("#temperature").html((result.main.temp - 273.15).toFixed(1));
       $("#feels-like").html((result.main.feels_like - 273.15).toFixed(1));
       $("#humidity").html(result.main.humidity);
@@ -341,19 +358,15 @@ var satellite = L.tileLayer(
   }
 );
 
+var basemaps = {
+  Streets: streets,
+  Satellite: satellite,
+};
 
-
-  var basemaps = {
-    Streets: streets,
-    Satellite: satellite
-  };
-  
-  var markermaps = {
-    Airports: airportLayer,
-    Earthquakes: earthquakeLayer
-  }
-
-  
+var markermaps = {
+  Airports: airportLayer,
+  Earthquakes: earthquakeLayer,
+};
 
 // buttons
 
@@ -382,7 +395,6 @@ $(document).ready(function () {
 
   L.control.layers(basemaps).addTo(map);
   L.control.layers(markermaps).addTo(map);
-
 
   infoBtn.addTo(map);
   currencyBtn.addTo(map);

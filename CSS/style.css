@@ -27,14 +27,6 @@ html, body {
   margin-right: 20px;
 }
 
-.currency-input {
-  width: 100px;
-}
-
-#convert {
-  border-radius: 10px;
-  margin-left: 200px;
-}
 
 .weather-div {
   border-radius: 10px;
@@ -90,4 +82,35 @@ html, body {
 
 .bigger-icon {
   width: 10px;
+}
+
+.currency-table tr {
+  display: flex;
+  flex-direction: column;
+}
+
+.currency-input {
+  width: 200px;
+}
+
+#convert {
+  border-radius: 10px;
+  margin-left: 50px;
+  width: 200px;
+}
+
+@media (min-width: 450px) {
+  .currency-table tr {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .currency-input {
+    width: 100px;
+  }
+
+  #convert {
+    border-radius: 10px;
+    margin-left: 200px;
+  }
 }
