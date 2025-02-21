@@ -28,27 +28,4 @@ if ($result === false) {
 }
 curl_close($ch);
 
-// Parse XML
-// $xml = simplexml_load_string($result);
-// if ($xml === false) {
-//     $output['status']['code'] = "500";
-//     $output['status']['name'] = "error";
-//     $output['status']['description'] = "Failed to parse XML from the API.";
-//     $output['data'] = [];
-//     echo json_encode($output);
-//     exit;
-// }
-
-// Convert XML to JSON
-// $jsonData = json_encode($xml);
-// $decode = json_decode($jsonData, true);
-
-// $output['status']['code'] = "200";
-// $output['status']['name'] = "ok";
-// $output['status']['description'] = "success";
-// $output['status']['returnedIn'] = intval((microtime(true) - $executionStartTime) * 1000) . " ms";
-// $output['data'] = $decode;
-
-
-
 echo json_encode($result);

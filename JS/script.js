@@ -361,12 +361,10 @@ var satellite = L.tileLayer(
 var basemaps = {
   Streets: streets,
   Satellite: satellite,
-};
-
-var markermaps = {
   Airports: airportLayer,
   Earthquakes: earthquakeLayer,
 };
+
 
 // buttons
 
@@ -382,6 +380,14 @@ var weatherBtn = L.easyButton("fa-cloud fa-xl", function (btn, map) {
   $("#weatherModal").modal("show");
 });
 
+var wikipediaBtn = L.easyButton("fa-brands fa-wikipedia-w fa-xl", function (btn, map) {
+  $("#WikipediaModal").modal("show");
+});
+
+var newsBtn = L.easyButton("fa-newspaper fa-xl", function (btn, map) {
+  $("#newsModal").modal("show");
+});
+
 // ---------------------------------------------------------
 // EVENT HANDLERS
 // ---------------------------------------------------------
@@ -394,9 +400,12 @@ $(document).ready(function () {
   // deploying map.fitBounds() on the country border polygon
 
   L.control.layers(basemaps).addTo(map);
-  L.control.layers(markermaps).addTo(map);
 
   infoBtn.addTo(map);
   currencyBtn.addTo(map);
   weatherBtn.addTo(map);
+  wikipediaBtn.addTo(map);
+  newsBtn.addTo(map);
 });
+
+
