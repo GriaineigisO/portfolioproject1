@@ -206,7 +206,7 @@
       <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content shadow">
           <div class="modal-header bg-success bg-gradient text-white">
-            <h5 class="modal-title">Weather Report</h5>
+            <h5 class="modal-title">Wikipedia</h5>
             <button
               type="button"
               class="btn-close btn-close-white"
@@ -214,41 +214,18 @@
               aria-label="Close"
             ></button>
           </div>
-          <div class="modal-body weather-modal-body">
+          <div class="modal-body">
 
-            <div class="col">
-              <div class="row">
-                <div id="weather-div-top">
-                  <img id="weather-icon">
-                  <p id="temp-reading"><span id="temperature"></span>°C</p>
-                  <span id="weather-description"></span>
-                </div>
-              </div>
-
-              <div class="row" id="bottom-weather-row">
-                <div class="col">
-                  <div class="icon-data-div">
-                    <i class="fa-solid fa-temperature-low" class="bigger-icon"></i>
-                    <div class="weather-div-bottom">
-                      <p>Feels like</p>
-                      <p><span id="feels-like"></span>°C</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col">
-                  <div  class="icon-data-div">
-                    <i class="fa-solid fa-droplet"></i>
-                    <div class="weather-div-bottom">
-                      <p>Humidity</p>
-                      <p><span id="humidity"></span>%</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div class="row wikipedia-top-row">
+                <h5 id="wikipedia-title"></h5>
+                <img id="wikipedia-thumbnail">
             </div>
-          
-
+          <div class="row">
+            <p><span id="wikipedia-description"></span>
+            </p>
+            <p><a id="wikipedia-link" target="_blank">Read More</a></p>
           </div>
+
           <div class="modal-footer">
             <button
               type="button"
@@ -261,12 +238,13 @@
         </div>
       </div>
     </div>
+    </div>
 
     <div id="newsModal" class="modal" data-bs-backdrop="false" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content shadow">
           <div class="modal-header bg-success bg-gradient text-white">
-            <h5 class="modal-title">Weather Report</h5>
+            <h5 class="modal-title">News</h5>
             <button
               type="button"
               class="btn-close btn-close-white"
@@ -274,40 +252,8 @@
               aria-label="Close"
             ></button>
           </div>
-          <div class="modal-body weather-modal-body">
-
-            <div class="col">
-              <div class="row">
-                <div id="weather-div-top">
-                  <img id="weather-icon">
-                  <p id="temp-reading"><span id="temperature"></span>°C</p>
-                  <span id="weather-description"></span>
-                </div>
-              </div>
-
-              <div class="row" id="bottom-weather-row">
-                <div class="col">
-                  <div class="icon-data-div">
-                    <i class="fa-solid fa-temperature-low" class="bigger-icon"></i>
-                    <div class="weather-div-bottom">
-                      <p>Feels like</p>
-                      <p><span id="feels-like"></span>°C</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col">
-                  <div  class="icon-data-div">
-                    <i class="fa-solid fa-droplet"></i>
-                    <div class="weather-div-bottom">
-                      <p>Humidity</p>
-                      <p><span id="humidity"></span>%</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          
-
+          <div class="modal-body" id="newsModalBody">        
+            
           </div>
           <div class="modal-footer">
             <button

@@ -86,7 +86,6 @@ function useSelectedCountry() {
 
   let selectedCountry = document.getElementById("countrySelect").value;
   let countryNameH4 = document.getElementById("country-name");
-  let flag = document.getElementById("flag");
   countryNameH4.innerHTML = selectedCountry;
 
   for (let i = 0; i < countryData.features.length; i++) {
@@ -99,6 +98,8 @@ function useSelectedCountry() {
 
       currencyInfo();
       getAirports(countryData.features[i].properties.iso_a2);
+      wikipedia(countryData.features[i].properties.name);
+      newsData(countryData.features[i].properties.name);
 
       // Handle Polygon or MultiPolygon
       if (geometry.type === "Polygon" || geometry.type === "MultiPolygon") {
@@ -207,7 +208,6 @@ function getAirports(country) {
         airportLayer.addLayer(marker);
       }
 
-      console.log(`${result.data.length} airports loaded.`);
     },
     error: function ajaxError(jqXHR) {
       console.error("Error: ", jqXHR.responseText);
@@ -254,8 +254,6 @@ function getEarthquakes(north, east, south, west) {
 
         earthquakeLayer.addLayer(marker);
       }
-
-      console.log(`${result.data.earthquakes.length} earthquakes loaded.`);
     },
     error: function ajaxError(jqXHR) {
       console.error("Error: ", jqXHR.responseText);
@@ -290,6 +288,110 @@ function currencyInfo() {
         });
 
         return currencyCodes;
+      } else {
+        console.error("API status is not OK:", result.status);
+      }
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+      console.error("AJAX Error:", textStatus, errorThrown, jqXHR.responseText);
+      console.log(jqXHR.responseText);
+    },
+  });
+}
+
+function wikipedia(place) {
+  $.ajax({
+    url: "./PHP/wikipedia.php",
+    type: "GET",
+    dataType: "json",
+    data: {
+      place: place,
+    },
+    success: function (result) {
+      if (result) {
+        for (let i = 0; i < result.data.entry.length; i++) {
+          if (result.data.entry[i].title === place) {
+            $("#wikipedia-title").html(result.data.entry[i].title);
+            $("#wikipedia-description").html(result.data.entry[i].summary);
+            $("#wikipedia-thumbnail").attr(
+              "src",
+              `${result.data.entry[i].thumbnailImg}`
+            );
+            $("#wikipedia-link").attr(
+              "href",
+              `${result.data.entry[i].wikipediaUrl}`
+            )
+          }
+        }
+      } else {
+        console.error("API status is not OK:", result.status);
+      }
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+      console.error("AJAX Error:", textStatus, errorThrown, jqXHR.responseText);
+      console.log(jqXHR.responseText);
+    },
+  });
+}
+
+function newsData(place) {
+  $.ajax({
+    url: "./PHP/newsData.php",
+    type: "GET",
+    dataType: "json",
+    data: {
+      place: place,
+    },
+    success: function (result) {
+      if (result) {
+        let newsModalBody = document.getElementById("newsModalBody");
+        newsModalBody.replaceChildren();
+        for (let i = 0; i < result.data.results.length; i++) {
+          if (result.data.results[i].country.includes(place.toLowerCase())) {
+            console.log(result.data.results[i].title)
+
+            let newsDiv = document.createElement("div");
+            newsDiv.setAttribute("class", "newsDiv");
+            
+            let newsTitle = document.createElement("h6");
+            newsTitle.innerHTML = result.data.results[i].title
+            newsTitle.setAttribute("class", "newsTitle")
+
+            let newsImage = document.createElement("img");
+            newsImage.setAttribute("src", result.data.results[i].image_url)
+            newsImage.setAttribute("class", "newsImage")
+
+            let newsDescription = document.createElement("p");
+            newsDescription.innerHTML = result.data.results[i].description;
+            newsDescription.setAttribute("class", "newsDescription");
+
+            let newsDate = document.createElement("p");
+            newsDate.innerHTML = result.data.results[i].pubDate;
+            newsDate.setAttribute("class", "newsDate");
+
+            let newsSource = document.createElement("p");
+            newsSource.innerHTML = result.data.results[i].source_name;
+            newsSource.setAttribute("class", "newsSource");
+
+            console.log("here")
+
+            let newsButton = document.createElement("button");
+            newsButton.addEventListener("click", () => {
+              let redirectWindow = window.open(result.data.results[i].link, '_blank');
+              redirectWindow.location;
+            });
+            newsButton.setAttribute("class", "newsButton");
+            newsButton.innerHTML = "Click Here For Full Article"
+
+            newsDiv.appendChild(newsImage);
+            newsDiv.appendChild(newsTitle);
+            newsDiv.appendChild(newsDescription);
+            newsDiv.appendChild(newsDate);
+            newsDiv.appendChild(newsSource);
+            newsDiv.appendChild(newsButton);
+            newsModalBody.appendChild(newsDiv);
+          }
+        }
       } else {
         console.error("API status is not OK:", result.status);
       }
@@ -365,7 +467,6 @@ var basemaps = {
   Earthquakes: earthquakeLayer,
 };
 
-
 // buttons
 
 var infoBtn = L.easyButton("fa-info fa-xl", function (btn, map) {
@@ -380,9 +481,12 @@ var weatherBtn = L.easyButton("fa-cloud fa-xl", function (btn, map) {
   $("#weatherModal").modal("show");
 });
 
-var wikipediaBtn = L.easyButton("fa-brands fa-wikipedia-w fa-xl", function (btn, map) {
-  $("#WikipediaModal").modal("show");
-});
+var wikipediaBtn = L.easyButton(
+  "fa-brands fa-wikipedia-w fa-xl",
+  function (btn, map) {
+    $("#wikipediaModal").modal("show");
+  }
+);
 
 var newsBtn = L.easyButton("fa-newspaper fa-xl", function (btn, map) {
   $("#newsModal").modal("show");
@@ -407,5 +511,3 @@ $(document).ready(function () {
   wikipediaBtn.addTo(map);
   newsBtn.addTo(map);
 });
-
-
