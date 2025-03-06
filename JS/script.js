@@ -1,7 +1,5 @@
-// Global variable to store country data
 let countryData = null;
-
-// Reference to the Leaflet map (initialize it once globally)
+let countryOutlineLayer = null;
 let map;
 
 // Fetch country data and store it globally
@@ -101,6 +99,20 @@ function useSelectedCountry() {
       wikipedia(countryData.features[i].properties.name);
       newsData(countryData.features[i].properties.name);
 
+      // Remove previous outline if it exists
+      if (countryOutlineLayer) {
+        map.removeLayer(countryOutlineLayer);
+      }
+
+      // Add new country outline
+      countryOutlineLayer = L.geoJSON(countryData.features[i], {
+        style: {
+          color: "blue", // Outline color
+          weight: 2, // Border thickness
+          fillOpacity: 0, // No fill, only outline
+        },
+      }).addTo(map);
+
       // Handle Polygon or MultiPolygon
       if (geometry.type === "Polygon" || geometry.type === "MultiPolygon") {
         const feature = turf.feature(geometry); // Create a Turf feature
@@ -157,7 +169,7 @@ function countryInfo(countryCode, countryName) {
           `https://en.wikipedia.org/wiki/${countryName}`
         );
 
-        getWeather(entry.capital, countryName);
+        getWeather(entry.capital, countryName, entry.countryCode);
       } else {
         console.error("API status is not OK:", result.status);
       }
@@ -207,7 +219,6 @@ function getAirports(country) {
 
         airportLayer.addLayer(marker);
       }
-
     },
     error: function ajaxError(jqXHR) {
       console.error("Error: ", jqXHR.responseText);
@@ -320,7 +331,7 @@ function wikipedia(place) {
             $("#wikipedia-link").attr(
               "href",
               `${result.data.entry[i].wikipediaUrl}`
-            )
+            );
           }
         }
       } else {
@@ -348,18 +359,16 @@ function newsData(place) {
         newsModalBody.replaceChildren();
         for (let i = 0; i < result.data.results.length; i++) {
           if (result.data.results[i].country.includes(place.toLowerCase())) {
-            console.log(result.data.results[i].title)
-
             let newsDiv = document.createElement("div");
             newsDiv.setAttribute("class", "newsDiv");
-            
+
             let newsTitle = document.createElement("h6");
-            newsTitle.innerHTML = result.data.results[i].title
-            newsTitle.setAttribute("class", "newsTitle")
+            newsTitle.innerHTML = result.data.results[i].title;
+            newsTitle.setAttribute("class", "newsTitle");
 
             let newsImage = document.createElement("img");
-            newsImage.setAttribute("src", result.data.results[i].image_url)
-            newsImage.setAttribute("class", "newsImage")
+            newsImage.setAttribute("src", result.data.results[i].image_url);
+            newsImage.setAttribute("class", "newsImage");
 
             let newsDescription = document.createElement("p");
             newsDescription.innerHTML = result.data.results[i].description;
@@ -373,15 +382,16 @@ function newsData(place) {
             newsSource.innerHTML = result.data.results[i].source_name;
             newsSource.setAttribute("class", "newsSource");
 
-            console.log("here")
-
             let newsButton = document.createElement("button");
             newsButton.addEventListener("click", () => {
-              let redirectWindow = window.open(result.data.results[i].link, '_blank');
+              let redirectWindow = window.open(
+                result.data.results[i].link,
+                "_blank"
+              );
               redirectWindow.location;
             });
             newsButton.setAttribute("class", "newsButton");
-            newsButton.innerHTML = "Click Here For Full Article"
+            newsButton.innerHTML = "Click Here For Full Article";
 
             newsDiv.appendChild(newsImage);
             newsDiv.appendChild(newsTitle);
@@ -403,7 +413,9 @@ function newsData(place) {
   });
 }
 
-document.getElementById("convert").addEventListener("click", convertCurrency);
+document
+  .getElementById("start-amount")
+  .addEventListener("input", convertCurrency);
 function convertCurrency() {
   let rateA = document.getElementById("start-currency").value;
   let rateB = document.getElementById("end-currency").value;
@@ -420,22 +432,87 @@ function convertCurrency() {
 }
 
 //Function to recieve weather data
-function getWeather(capital, country) {
+function getWeather(capital, country, countryCode) {
   $.ajax({
-    url: `https://api.openweathermap.org/data/2.5/weather?q=${capital.toLowerCase()},${country.toLowerCase()}&APPID=f33a3fb8c17b7ef1026439ad7f3a27a2`,
+    url: `./PHP/weather.php`,
     type: "GET",
     dataType: "json",
+    data: {
+      // lat: lat,
+      // lng: long,
+      capital: capital,
+    },
 
     success: function (result) {
-      $("#weather-description").html(result.weather[0].description);
-      $("#weather-icon").attr(
-        "src",
-        `https://openweathermap.org/img/wn/${result.weather[0].icon}.png`
-      );
-      $("#temperature").html((result.main.temp - 273.15).toFixed(1));
-      $("#feels-like").html((result.main.feels_like - 273.15).toFixed(1));
-      $("#humidity").html(result.main.humidity);
-      $("#wind-speed").html(result.wind.speed);
+      $("#weather-description").html(result.data.current.condition.text);
+      $("#weather-icon").attr("src", `${result.data.current.condition.icon}`);
+      $("#temperature").html(result.data.current.temp_c.toFixed(1));
+      $("#feels-like").html(result.data.current.feelslike_c.toFixed(1));
+      $("#humidity").html(result.data.current.humidity);
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+      console.error("AJAX Error:", textStatus, errorThrown, jqXHR.responseText);
+      console.log(jqXHR.responseText);
+    },
+  });
+
+  $.ajax({
+    url: `./PHP/forecastWeather.php`,
+    type: "GET",
+    dataType: "json",
+    data: {
+      capital: capital,
+    },
+
+    success: function (result) {
+      let forecastDiv = document.getElementById("forecast-div");
+      forecastDiv.replaceChildren();
+      for (
+        let i = 0;
+        i < result.data.forecast.forecastday[0].hour.length;
+        i++
+      ) {
+        //check what the current time is, so the forecast only shows data for future hours
+        if (
+          result.data.current.last_updated_epoch <
+          result.data.forecast.forecastday[0].hour[i].time_epoch
+        ) {
+          let forecastBox = document.createElement("div");
+          forecastBox.setAttribute("class", "forecast-box");
+          let time = document.createElement("h6");
+          time.innerHTML = result.data.forecast.forecastday[0].hour[i].time;
+          let icon = document.createElement("img");
+          icon.setAttribute(
+            "src",
+            result.data.forecast.forecastday[0].hour[i].condition.icon
+          );
+          let description = document.createElement("p");
+          description.innerHTML =
+            result.data.forecast.forecastday[0].hour[i].condition.text;
+          let temp = document.createElement("p");
+          temp.innerHTML = `Temp: ${result.data.forecast.forecastday[0].hour[i].temp_c}°C `;
+          let chanceOfRain = document.createElement("p");
+          chanceOfRain.innerHTML = `Chance of rain: ${result.data.forecast.forecastday[0].hour[i].chance_of_rain}%`;
+          let humidity = document.createElement("p");
+          humidity.innerHTML = `Humidity: ${result.data.forecast.forecastday[0].hour[i].humidity}%`;
+
+          let iconDiv = document.createElement("div");
+          iconDiv.setAttribute("class", "icon-div");
+          iconDiv.appendChild(icon);
+          iconDiv.appendChild(description);
+
+          let tempDiv = document.createElement("div");
+          tempDiv.setAttribute("class", "temp-div");
+          tempDiv.appendChild(temp);
+          tempDiv.appendChild(chanceOfRain);
+          tempDiv.appendChild(humidity);
+
+          forecastBox.appendChild(time);
+          forecastBox.appendChild(iconDiv);
+          forecastBox.appendChild(tempDiv);
+          forecastDiv.appendChild(forecastBox);
+        }
+      }
     },
     error: function (jqXHR, textStatus, errorThrown) {
       console.error("AJAX Error:", textStatus, errorThrown, jqXHR.responseText);
@@ -463,6 +540,9 @@ var satellite = L.tileLayer(
 var basemaps = {
   Streets: streets,
   Satellite: satellite,
+};
+
+var overlays = {
   Airports: airportLayer,
   Earthquakes: earthquakeLayer,
 };
@@ -500,10 +580,8 @@ var newsBtn = L.easyButton("fa-newspaper fa-xl", function (btn, map) {
 
 $(document).ready(function () {
   initializeMap();
-  // setView is not required in your application as you will be
-  // deploying map.fitBounds() on the country border polygon
 
-  L.control.layers(basemaps).addTo(map);
+  L.control.layers(basemaps, overlays).addTo(map);
 
   infoBtn.addTo(map);
   currencyBtn.addTo(map);

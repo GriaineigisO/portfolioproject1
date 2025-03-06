@@ -127,7 +127,6 @@
                 <td><select class="currency-converter" id="end-currency"></select></td>
               </tr>
             </table>
-            <td><button id="convert">Convert</button></td>
           </div>
           <div class="modal-footer">
             <button
@@ -157,34 +156,28 @@
           <div class="modal-body weather-modal-body">
 
             <div class="col">
-              <div class="row">
-                <div id="weather-div-top">
+
+              <div class="row" id="current-weather">
+                <h5 id="current-weather-h5">Today</h5>
+                <div class="col">
                   <img id="weather-icon">
-                  <p id="temp-reading"><span id="temperature"></span>°C</p>
-                  <span id="weather-description"></span>
                 </div>
+                <div class="col">
+                    <p id="weather-description"></p>
+                    <p><i class="fa-solid fa-temperature-low"></i> Feels like: <span id="feels-like"></span>°C</p>
+                    <p><i class="fa-solid fa-droplet"></i> Humidity <span id="humidity"></span>%</p>
+                </div>
+                <div class="col">
+                    <p id="temp-reading"><span id="temperature"></span>°C </p>
+                </div>
+                
               </div>
 
-              <div class="row" id="bottom-weather-row">
-                <div class="col">
-                  <div class="icon-data-div">
-                    <i class="fa-solid fa-temperature-low" class="bigger-icon"></i>
-                    <div class="weather-div-bottom">
-                      <p>Feels like</p>
-                      <p><span id="feels-like"></span>°C</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col">
-                  <div  class="icon-data-div">
-                    <i class="fa-solid fa-droplet"></i>
-                    <div class="weather-div-bottom">
-                      <p>Humidity</p>
-                      <p><span id="humidity"></span>%</p>
-                    </div>
-                  </div>
-                </div>
+              <div id="forecast-div" class="row">
+
               </div>
+
+
             </div>
           
 
